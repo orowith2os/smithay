@@ -200,8 +200,9 @@ pub fn run_x11(log: Logger) {
     let mut cursor_visible;
 
     #[cfg(feature = "xwayland")]
-    state.start_xwayland();
-
+    if let Err(e) = state.xwayland.start() {
+        error!(log, "Failed to start XWayland: {}", e);
+    }
     info!(log, "Initialization completed, starting the main loop.");
 
     while state.running.load(Ordering::SeqCst) {

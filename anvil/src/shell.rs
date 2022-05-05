@@ -813,7 +813,7 @@ pub struct SurfaceData {
 
 fn surface_commit(surface: &wl_surface::WlSurface, space: &RefCell<Space>, popups: &mut PopupManager) {
     #[cfg(feature = "xwayland")]
-    super::xwayland::commit_hook(surface);
+    smithay::xwayland::xwm::commit_hook(surface);
 
     popups.commit(surface);
     let mut space = space.borrow_mut();

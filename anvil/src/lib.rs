@@ -22,7 +22,5 @@ pub mod udev;
 pub mod winit;
 #[cfg(feature = "x11")]
 pub mod x11;
-#[cfg(feature = "xwayland")]
-pub mod xwayland;
 
 pub use state::AnvilState;
