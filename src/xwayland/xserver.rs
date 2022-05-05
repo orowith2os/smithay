@@ -376,7 +376,7 @@ fn spawn_xwayland(
 
     let mut xwayland_args = format!(":{} -rootless -terminate -wm {}", display, wm_socket.as_raw_fd());
     for socket in listen_sockets {
-        xwayland_args.push_str(&format!(" -listen {}", socket.as_raw_fd()));
+        xwayland_args.push_str(&format!(" -listenfd {}", socket.as_raw_fd()));
     }
     // This command let sh to:
     // * Set up signal handler for USR1

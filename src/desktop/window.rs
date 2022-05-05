@@ -1,3 +1,5 @@
+#[cfg(feature = "xwayland")]
+use crate::xwayland::X11Surface;
 use crate::{
     backend::renderer::{utils::draw_surface_tree, ImportAll, Renderer},
     desktop::{utils::*, PopupManager, Space},
@@ -8,6 +10,7 @@ use crate::{
         shell::xdg::{SurfaceCachedState, ToplevelSurface},
     },
 };
+
 use std::{
     cell::Cell,
     hash::{Hash, Hasher},
@@ -24,37 +27,22 @@ crate::utils::ids::id_gen!(next_window_id, WINDOW_ID, WINDOW_IDS);
 pub enum Kind {
     /// xdg-shell [`ToplevelSurface`]
     Xdg(ToplevelSurface),
-    /// XWayland surface (TODO)
+    /// XWayland surface [`X11Surface`]
     #[cfg(feature = "xwayland")]
     X11(X11Surface),
-}
-
-/// Xwayland surface
-#[derive(Debug, Clone)]
-#[cfg(feature = "xwayland")]
-pub struct X11Surface {
-    /// underlying wl_surface
-    pub surface: wl_surface::WlSurface,
-}
-
-#[cfg(feature = "xwayland")]
-impl std::cmp::PartialEq for X11Surface {
-    fn eq(&self, other: &Self) -> bool {
-        self.alive() && other.alive() && self.surface == other.surface
-    }
 }
 
 #[cfg(feature = "xwayland")]
 impl X11Surface {
     /// Checks if the surface is still alive.
     pub fn alive(&self) -> bool {
-        self.surface.as_ref().is_alive()
+        self.wl_surface().map(|x| x.as_ref().is_alive()).unwrap_or(false)
     }
 
     /// Returns the underlying [`WlSurface`](wl_surface::WlSurface), if still any.
     pub fn get_surface(&self) -> Option<&wl_surface::WlSurface> {
         if self.alive() {
-            Some(&self.surface)
+            self.wl_surface()
         } else {
             None
         }
