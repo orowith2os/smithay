@@ -1,0 +1,64 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Utilities for input method support"><meta name="keywords" content="rust, rustlang, rust-lang, input_method"><title>smithay::wayland::input_method - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../smithay/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../smithay/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"><a href="#">Module input_method</a></h2><div class="sidebar-elems"><section><div class="block"><ul><li><a href="#structs">Structs</a></li><li><a href="#traits">Traits</a></li></ul></div></section></div></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../smithay/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="main-heading"><h1 class="fqn"><span class="in-band">Module <a href="../../index.html">smithay</a>::<wbr><a href="../index.html">wayland</a>::<wbr><a class="mod" href="#">input_method</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../../../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../../../src/smithay/wayland/input_method/mod.rs.html#1-229">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Utilities for input method support</p>
+<p>This module provides you with utilities to handle input methods,
+it must be used in conjunction with the text input module to work.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">smithay</span>::{
+    <span class="ident">delegate_seat</span>, <span class="ident">delegate_tablet_manager</span>, <span class="ident">delegate_input_method_manager</span>,
+    <span class="ident">delegate_text_input_manager</span>,
+};
+<span class="kw">use</span> <span class="ident">smithay::input</span>::{<span class="ident">Seat</span>, <span class="ident">SeatState</span>, <span class="ident">SeatHandler</span>, <span class="ident">keyboard::XkbConfig</span>, <span class="ident">pointer::CursorImageStatus</span>};
+<span class="kw">use</span> <span class="ident">smithay::wayland::input_method</span>::{
+    <span class="ident">InputMethodManagerState</span>,
+    <span class="ident">InputMethodSeat</span>
+};
+<span class="kw">use</span> <span class="ident">smithay::wayland::text_input::TextInputManagerState</span>;
+<span class="kw">use</span> <span class="ident">smithay::reexports::wayland_server</span>::{<span class="ident">Display</span>, <span class="ident">protocol::wl_surface::WlSurface</span>};
+
+
+<span class="macro">delegate_seat!</span>(<span class="ident">State</span>);
+<span class="comment">// Delegate input method handling for State to InputMethodManagerState.</span>
+<span class="macro">delegate_input_method_manager!</span>(<span class="ident">State</span>);
+<span class="macro">delegate_text_input_manager!</span>(<span class="ident">State</span>);
+
+
+<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">seat_state</span> <span class="op">=</span> <span class="ident">SeatState</span>::<span class="op">&lt;</span><span class="ident">State</span><span class="op">&gt;</span><span class="ident">::new</span>();
+
+<span class="comment">// implement the required traits</span>
+<span class="kw">impl</span> <span class="ident">SeatHandler</span> <span class="kw">for</span> <span class="ident">State</span> {
+    <span class="kw">type</span> <span class="ident">KeyboardFocus</span> <span class="op">=</span> <span class="ident">WlSurface</span>;
+    <span class="kw">type</span> <span class="ident">PointerFocus</span> <span class="op">=</span> <span class="ident">WlSurface</span>;
+    <span class="kw">fn</span> <span class="ident">seat_state</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut</span> <span class="ident">SeatState</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">seat_state</span>
+    }
+    <span class="kw">fn</span> <span class="ident">focus_changed</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">seat</span>: <span class="kw-2">&amp;</span><span class="ident">Seat</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">focused</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">WlSurface</span><span class="op">&gt;</span>) { <span class="macro">unimplemented!</span>() }
+    <span class="kw">fn</span> <span class="ident">cursor_image</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">seat</span>: <span class="kw-2">&amp;</span><span class="ident">Seat</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">image</span>: <span class="ident">CursorImageStatus</span>) { <span class="macro">unimplemented!</span>() }
+}
+
+<span class="comment">// Add the seat state to your state and create manager globals</span>
+<span class="ident">InputMethodManagerState::new</span>::<span class="op">&lt;</span><span class="ident">State</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">display_handle</span>);
+<span class="comment">// Add text input capabilities, needed for the input method to work</span>
+<span class="ident">TextInputManagerState::new</span>::<span class="op">&lt;</span><span class="ident">State</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">display_handle</span>);
+
+<span class="comment">// create the seat</span>
+<span class="kw">let</span> <span class="ident">seat</span> <span class="op">=</span> <span class="ident">seat_state</span>.<span class="ident">new_wl_seat</span>(
+    <span class="kw-2">&amp;</span><span class="ident">display_handle</span>,          <span class="comment">// the display</span>
+    <span class="string">&quot;seat-0&quot;</span>,                 <span class="comment">// the name of the seat, will be advertized to clients</span>
+    <span class="prelude-val">None</span>                      <span class="comment">// insert a logger here</span>
+);
+
+<span class="ident">seat</span>.<span class="ident">add_input_method</span>(<span class="ident">XkbConfig::default</span>(), <span class="number">200</span>, <span class="number">25</span>);
+<span class="comment">// Add input method capabilities to a seat</span>
+</code></pre></div>
+<h4 id="run-usage"><a href="#run-usage">Run usage</a></h4>
+<p>Once the input method and text input cabailities have been added to a seat,
+use the [<code>seat.input_method().set_point</code>] function to set the top left point
+of a focused surface. This is used to calculate the popup surface location.</p>
+<p>Then use the [<code>seat.input_method().coordinates</code>] and [<code>seat.input_method().with_surface</code>]
+functions to draw the popup surface.</p>
+</div></details><h2 id="structs" class="small-section-header"><a href="#structs">Structs</a></h2><div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.InputMethodHandle.html" title="smithay::wayland::input_method::InputMethodHandle struct">InputMethodHandle</a></div><div class="item-right docblock-short"><p>Handle to an input method instance</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.InputMethodKeyboardUserData.html" title="smithay::wayland::input_method::InputMethodKeyboardUserData struct">InputMethodKeyboardUserData</a></div><div class="item-right docblock-short"><p>User data of ZwpInputKeyboardGrabV2 object</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.InputMethodManagerState.html" title="smithay::wayland::input_method::InputMethodManagerState struct">InputMethodManagerState</a></div><div class="item-right docblock-short"><p>State of wp misc input method protocol</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.InputMethodPopupSurfaceUserData.html" title="smithay::wayland::input_method::InputMethodPopupSurfaceUserData struct">InputMethodPopupSurfaceUserData</a></div><div class="item-right docblock-short"><p>User data of ZwpInputPopupSurfaceV2 object</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.InputMethodUserData.html" title="smithay::wayland::input_method::InputMethodUserData struct">InputMethodUserData</a></div><div class="item-right docblock-short"><p>User data of ZwpInputMethodV2 object</p>
+</div></div></div><h2 id="traits" class="small-section-header"><a href="#traits">Traits</a></h2><div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="trait" href="trait.InputMethodSeat.html" title="smithay::wayland::input_method::InputMethodSeat trait">InputMethodSeat</a></div><div class="item-right docblock-short"><p>Extends <a href="../../input/struct.Seat.html" title="Seat">Seat</a> with input method functionality</p>
+</div></div></div></section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="smithay" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>

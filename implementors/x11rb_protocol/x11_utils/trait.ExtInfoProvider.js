@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["x11rb"] = [{"text":"impl <a class=\"trait\" href=\"x11rb/x11_utils/trait.ExtInfoProvider.html\" title=\"trait x11rb::x11_utils::ExtInfoProvider\">ExtInfoProvider</a> for <a class=\"struct\" href=\"x11rb/extension_manager/struct.ExtensionManager.html\" title=\"struct x11rb::extension_manager::ExtensionManager\">ExtensionManager</a>","synthetic":false,"types":["x11rb::extension_manager::ExtensionManager"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
